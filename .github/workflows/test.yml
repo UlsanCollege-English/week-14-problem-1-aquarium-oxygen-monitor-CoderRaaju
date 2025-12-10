@@ -1,0 +1,49 @@
+name: Run Pytest Tests
+
+# 1. Configure when the workflow should run
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  # Allows manual running from the Actions tab
+  workflow_dispatch:
+
+# 2. Define a job to run the tests
+jobs:
+  test:
+    # Test across multiple versions of Python for robustness
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.11"] # Test on two common/recent Python versions
+    
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Python environment based on the matrix
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip' # Cache pip dependencies for faster runs
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: |
+          pip install pytest
+
+      # Step 4: Display Python and pip versions (optional but helpful)
+      - name: Show versions
+        run: |
+          python --version
+          pip --version
+          
+      # Step 5: Execute the tests
+      - name: Run Pytest
+        # The '-v' flag for verbose output is often useful in CI
+        run: |
+          pytest -v

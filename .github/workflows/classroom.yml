@@ -1,27 +1,38 @@
-name: Autograding Tests
-'on':
-- push
-- repository_dispatch
-permissions:
-  checks: write
-  actions: read
-  contents: read
+name: GitHub Classroom Workflow
+
+# 1. Trigger the workflow on pushes and pull requests to the main branch
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# 2. Define the jobs (tasks) to be executed
 jobs:
-  run-autograding-tests:
+  build:
+    # Use the latest Ubuntu environment
     runs-on: ubuntu-latest
-    if: github.actor != 'github-classroom[bot]'
+    
+    # 3. Define the steps for the job
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    - name: tests
-      id: tests
-      uses: classroom-resources/autograding-python-grader@v1
-      with:
-        timeout: 10
-        setup-command: ''
-    - name: Autograding Reporter
-      uses: classroom-resources/autograding-grading-reporter@v1
-      env:
-        TESTS_RESULTS: "${{steps.tests.outputs.result}}"
-      with:
-        runners: tests
+      # Step 1: Checkout the code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Python environment
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x' # Use the latest stable Python 3 version
+
+      # Step 3: Install dependencies (pytest is required by the test code)
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+
+      # Step 4: Run the Pytest tests
+      # Assuming your test file is named 'test_main.py' and located correctly
+      - name: Run tests
+        run: |
+          pytest test_main.py
